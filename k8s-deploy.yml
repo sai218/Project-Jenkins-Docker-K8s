@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: springboot
+  name: spring-controller
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        name: springboot
+    spec:
+      containers:
+      - image: sai218/jenkins-docker-k8s:4
+        name: springboot
+        ports:
+        - name: springboot
+          containerPort: 8080
+---
+# Node Port Service
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: springboot
+  name: springboot
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+     # nodePort: 30001
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    name: springboot
