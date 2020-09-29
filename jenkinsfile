@@ -1,0 +1,52 @@
+node {
+    
+    //first stage clong git url//
+    stage('git clone'){
+      
+        git credentialsId: 'gitcreden', url: 'https://github.com/sai218/Project-Jenkins-Docker-K8s.git'
+    } 
+    
+    //second stage running maven goals//
+    stage('maven install'){
+        
+        sh 'mvn install '
+        
+    }
+    
+    //Building Docker custome image//
+    stage('build docker image'){
+        
+        sh 'docker build -t sai218/jenkins-docker-k8s:4 .'
+    }
+    
+    //Pushing docker image to hub account//
+    stage('push docker image to docker hub'){
+       
+       withCredentials([string(credentialsId: 'dokerhubpswd', variable: 'dockerhublogin')]) {
+    //docker login//
+        sh "docker login -u sai218 -p ${dockerhublogin}"
+} 
+        sh 'docker push sai218/jenkins-docker-k8s:4 '
+        
+    }
+    
+    //K8s tomcat deploy//
+    stage('K8s deploy tomcat'){
+      
+        kubernetesDeploy( 
+        configs: 'k8s-deploy.yml',
+        kubeconfigId: 'kubeid1',
+        enableConfigSubstitution: true
+        )
+    
+    }
+    
+    // //k8s tomcat deploy 2nd method//
+    // stage('k8s using 2nd method'){
+        
+    //     sh 'kubectl create -f k8s-manifest-file.yml'
+    // }
+    
+    }
+    
+    
